@@ -113,7 +113,7 @@ export default function Home() {
       </header>
 
       {/* Main Content - Two Pane Layout */}
-      <main className="max-w-7xl mx-auto px-6 py-6">
+      <main className="max-w-7xl mx-auto px-6 pt-6">
         <div className="flex gap-6 h-[calc(100vh-140px)]">
           {/* Left Pane - Items (60%) */}
           <div className="flex-1 w-[60%]">
