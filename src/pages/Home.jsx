@@ -1,65 +1,71 @@
-import { Button } from "@/components/ui/button"
-import { Navigate, useNavigate } from "react-router-dom"
-import { LogOut, Loader2, ShoppingCart } from "lucide-react"
-import { useAuth } from "@/providers/AuthProvider"
-import { useState } from "react"
-import { signOut } from "@/services/auth.services"
-import ItemsPane from "@/components/ItemsPane"
-import OrderPane from "@/components/OrderPane"
+import { Button } from "@/components/ui/button";
+import { Navigate, useNavigate } from "react-router-dom";
+import { LogOut, Loader2, ShoppingCart, Sun, Moon } from "lucide-react";
+import { useAuth } from "@/providers/AuthProvider";
+import { useState } from "react";
+import { signOut } from "@/services/auth.services";
+import ItemsPane from "@/components/ItemsPane";
+import OrderPane from "@/components/OrderPane";
+import { useTheme } from "@/providers/ThemeProvider";
 
 export default function Home() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const [signingOut, setSigningOut] = useState(false)
-  const [orderItems, setOrderItems] = useState([])
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [signingOut, setSigningOut] = useState(false);
+  const [orderItems, setOrderItems] = useState([]);
+  const { theme, toggleTheme } = useTheme();
 
   if (!user) {
-    return <Navigate to="/login" />
+    return <Navigate to="/login" />;
   }
 
   const handleSignout = async () => {
-    setSigningOut(true)
+    setSigningOut(true);
     await signOut();
-    navigate("/login")
-    setSigningOut(false)
-  }
+    navigate("/login");
+    setSigningOut(false);
+  };
 
   const handleAddToOrder = (item) => {
-    setOrderItems(prevItems => {
-      const existingItem = prevItems.find(orderItem => orderItem.id === item.id)
-      
+    setOrderItems((prevItems) => {
+      const existingItem = prevItems.find(
+        (orderItem) => orderItem.id === item.id
+      );
+
       if (existingItem) {
-        return prevItems.map(orderItem =>
+        return prevItems.map((orderItem) =>
           orderItem.id === item.id
             ? { ...orderItem, quantity: orderItem.quantity + 1 }
             : orderItem
-        )
+        );
       } else {
-        return [...prevItems, { ...item, quantity: 1 }]
+        return [...prevItems, { ...item, quantity: 1 }];
       }
-    })
-  }
+    });
+  };
 
   const handleUpdateQuantity = (itemId, newQuantity) => {
     if (newQuantity <= 0) {
-      handleRemoveItem(itemId)
-      return
+      handleRemoveItem(itemId);
+      return;
     }
-    
-    setOrderItems(prevItems =>
-      prevItems.map(item =>
+
+    setOrderItems((prevItems) =>
+      prevItems.map((item) =>
         item.id === itemId ? { ...item, quantity: newQuantity } : item
       )
-    )
-  }
+    );
+  };
 
   const handleRemoveItem = (itemId) => {
-    setOrderItems(prevItems => prevItems.filter(item => item.id !== itemId))
-  }
+    setOrderItems((prevItems) =>
+      prevItems.filter((item) => item.id !== itemId)
+    );
+  };
 
   const handleClearOrder = () => {
-    setOrderItems([])
-  }
+    setOrderItems([]);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -74,8 +80,31 @@ export default function Home() {
               <h1 className="text-xl font-semibold">HUMS POS System</h1>
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" onClick={handleSignout} disabled={signingOut} className="cursor-pointer">
-                {signingOut ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <LogOut className="h-4 w-4 mr-2" />}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleTheme}
+                className="cursor-pointer"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSignout}
+                disabled={signingOut}
+                className="cursor-pointer"
+              >
+                {signingOut ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <LogOut className="h-4 w-4 mr-2" />
+                )}
                 {signingOut ? "Logging out..." : "Logout"}
               </Button>
             </div>
@@ -103,5 +132,5 @@ export default function Home() {
         </div>
       </main>
     </div>
-  )
-} 
+  );
+}
