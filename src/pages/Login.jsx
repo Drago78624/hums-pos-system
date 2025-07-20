@@ -35,9 +35,7 @@ export default function Login() {
         description: "Welcome back! Redirecting to dashboard..."
       })
       
-      setTimeout(() => {
-        navigate("/home")
-      }, 1500)
+      navigate("/")
       
     } catch (error) {
       toast.error("Login failed", {

@@ -1,14 +1,25 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Navigate } from "react-router-dom"
-import { LogOut, User, Settings, BarChart3, ShoppingCart, Package, Users, TrendingUp } from "lucide-react"
+import { Navigate, useNavigate } from "react-router-dom"
+import { LogOut, Loader2, User, Settings, BarChart3, ShoppingCart, Package, Users, TrendingUp } from "lucide-react"
 import { useAuth } from "@/providers/AuthProvider"
+import { useState } from "react"
+import { signOut } from "@/services/auth.services"
 
 export default function Home() {
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const [signingOut, setSigningOut] = useState(false)
 
   if (!user) {
     return <Navigate to="/login" />
+  }
+
+  const handleSignout = async () => {
+    setSigningOut(true)
+    await signOut();
+    navigate("/login")
+    setSigningOut(false)
   }
 
 
@@ -33,9 +44,9 @@ export default function Home() {
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>
-              <Button variant="outline" size="sm">
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
+              <Button variant="outline" size="sm" onClick={handleSignout} disabled={signingOut} className="cursor-pointer">
+                {signingOut ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <LogOut className="h-4 w-4 mr-2" />}
+                {signingOut ? "Logging out..." : "Logout"}
               </Button>
             </div>
           </div>
