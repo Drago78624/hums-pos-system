@@ -1,15 +1,17 @@
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Navigate, useNavigate } from "react-router-dom"
-import { LogOut, Loader2, User, Settings, BarChart3, ShoppingCart, Package, Users, TrendingUp } from "lucide-react"
+import { LogOut, Loader2, ShoppingCart } from "lucide-react"
 import { useAuth } from "@/providers/AuthProvider"
 import { useState } from "react"
 import { signOut } from "@/services/auth.services"
+import ItemsPane from "@/components/ItemsPane"
+import OrderPane from "@/components/OrderPane"
 
 export default function Home() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [signingOut, setSigningOut] = useState(false)
+  const [orderItems, setOrderItems] = useState([])
 
   if (!user) {
     return <Navigate to="/login" />
@@ -22,6 +24,42 @@ export default function Home() {
     setSigningOut(false)
   }
 
+  const handleAddToOrder = (item) => {
+    setOrderItems(prevItems => {
+      const existingItem = prevItems.find(orderItem => orderItem.id === item.id)
+      
+      if (existingItem) {
+        return prevItems.map(orderItem =>
+          orderItem.id === item.id
+            ? { ...orderItem, quantity: orderItem.quantity + 1 }
+            : orderItem
+        )
+      } else {
+        return [...prevItems, { ...item, quantity: 1 }]
+      }
+    })
+  }
+
+  const handleUpdateQuantity = (itemId, newQuantity) => {
+    if (newQuantity <= 0) {
+      handleRemoveItem(itemId)
+      return
+    }
+    
+    setOrderItems(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      )
+    )
+  }
+
+  const handleRemoveItem = (itemId) => {
+    setOrderItems(prevItems => prevItems.filter(item => item.id !== itemId))
+  }
+
+  const handleClearOrder = () => {
+    setOrderItems([])
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -36,14 +74,6 @@ export default function Home() {
               <h1 className="text-xl font-semibold">HUMS POS System</h1>
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" className="text-muted-foreground">
-                <User className="h-4 w-4 mr-2" />
-                Profile
-              </Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
               <Button variant="outline" size="sm" onClick={handleSignout} disabled={signingOut} className="cursor-pointer">
                 {signingOut ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <LogOut className="h-4 w-4 mr-2" />}
                 {signingOut ? "Logging out..." : "Logout"}
@@ -53,121 +83,23 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-semibold tracking-tight mb-2">Dashboard</h2>
-          <p className="text-muted-foreground">Manage your point of sale operations</p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Today's Sales</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold">$2,431</div>
-              <p className="text-xs text-muted-foreground">
-                +20.1% from yesterday
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Transactions</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold">45</div>
-              <p className="text-xs text-muted-foreground">
-                +12.5% from yesterday
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Products</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold">1,234</div>
-              <p className="text-xs text-muted-foreground">
-                3 items low in stock
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Customers</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold">573</div>
-              <p className="text-xs text-muted-foreground">
-                +201 since last month
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="space-y-6">
-          <h3 className="text-xl font-semibold">Quick Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Button size="lg" className="h-16 text-base font-medium">
-              <ShoppingCart className="h-5 w-5 mr-2" />
-              New Sale
-            </Button>
-            <Button variant="outline" size="lg" className="h-16 text-base font-medium">
-              <Package className="h-5 w-5 mr-2" />
-              View Products
-            </Button>
-            <Button variant="outline" size="lg" className="h-16 text-base font-medium">
-              <BarChart3 className="h-5 w-5 mr-2" />
-              Inventory
-            </Button>
-            <Button variant="outline" size="lg" className="h-16 text-base font-medium">
-              <TrendingUp className="h-5 w-5 mr-2" />
-              Reports
-            </Button>
+      {/* Main Content - Two Pane Layout */}
+      <main className="max-w-7xl mx-auto px-6 py-6">
+        <div className="flex gap-6 h-[calc(100vh-140px)]">
+          {/* Left Pane - Items (60%) */}
+          <div className="flex-1 w-[60%]">
+            <ItemsPane onAddToOrder={handleAddToOrder} />
           </div>
-        </div>
 
-        {/* Recent Activity */}
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-2 w-2 bg-primary rounded-full"></div>
-                    <span className="text-sm">Sale completed - $45.99</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">2 minutes ago</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-2 w-2 bg-primary rounded-full"></div>
-                    <span className="text-sm">Product added - MacBook Pro</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">5 minutes ago</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-2 w-2 bg-primary rounded-full"></div>
-                    <span className="text-sm">Customer registered - John Doe</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">10 minutes ago</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Right Pane - Order (40%) */}
+          <div className="w-[40%]">
+            <OrderPane
+              orderItems={orderItems}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemoveItem={handleRemoveItem}
+              onClearOrder={handleClearOrder}
+            />
+          </div>
         </div>
       </main>
     </div>
