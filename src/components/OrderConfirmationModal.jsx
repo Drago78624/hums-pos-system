@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatCurrency } from "@/lib/format-currency";
+import { createOrder, createOrderItems } from "@/services/order.services";
 
 export default function OrderConfirmationModal({
   open,
@@ -70,11 +71,17 @@ export default function OrderConfirmationModal({
     setIsSubmitting(true);
 
     try {
-      console.log(orderDetails);
-      console.log(orderItems);
-      // Here you would typically submit the order to your backend
-      // For now, we'll just simulate a successful order
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Create order
+      const newOrder = await createOrder(orderDetails);
+
+      // Create order items
+      const orderItems2 = orderItems.map((item) => ({
+        order_id: newOrder.id,
+        item_id: item.id,
+        quantity: item.quantity,
+        total_price: item.price * item.quantity,
+      }));
+      await createOrderItems(orderItems2);
 
       toast.success("Order placed successfully!", {
         description: "Your order has been confirmed and is being prepared.",
@@ -88,7 +95,7 @@ export default function OrderConfirmationModal({
       }
     } catch (error) {
       toast.error("Failed to place order", {
-        description: "Please try again or contact support.",
+        description: error.message,
       });
     } finally {
       setIsSubmitting(false);
