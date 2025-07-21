@@ -70,21 +70,12 @@ export default function Signup() {
       })
       
       setTimeout(() => {
-        navigate("/login")
+        navigate("/")
       }, 2000)
       
     } catch (error) {
-      console.error("Signup error:", error)
-      
-      let errorMessage = "Signup failed"
-      let errorDescription = "Please try again."
-      
-      if (error.message) {
-        errorDescription = error.message
-      }
-      
-      toast.error(errorMessage, {
-        description: errorDescription
+      toast.error("Signup failed", {
+        description: error.message
       })
     } finally {
       setIsLoading(false)
