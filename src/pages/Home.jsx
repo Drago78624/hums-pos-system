@@ -4,14 +4,32 @@ import { useState } from "react";
 import ItemsPane from "@/components/ItemsPane";
 import OrderPane from "@/components/OrderPane";
 import Navbar from "@/components/Navbar";
+import { useOrder } from "@/providers/OrderProvider";
 
 export default function Home() {
   const { user } = useAuth();
   const [orderItems, setOrderItems] = useState([]);
+  const { setOrder } = useOrder();
+  const navigate = useNavigate();
 
   if (!user) {
     return <Navigate to="/login" />;
   }
+
+  const processOrder = () => {
+    const totalAmount = orderItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
+
+    setOrder((prev) => ({
+      ...prev,
+      total_amount: totalAmount,
+      items: orderItems,
+    }));
+
+    navigate("/checkout");
+  };
 
   const handleAddToOrder = (item) => {
     setOrderItems((prevItems) => {
@@ -73,6 +91,7 @@ export default function Home() {
               onUpdateQuantity={handleUpdateQuantity}
               onRemoveItem={handleRemoveItem}
               onClearOrder={handleClearOrder}
+              onProcessOrder={processOrder}
             />
           </div>
         </div>

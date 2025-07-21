@@ -7,6 +7,7 @@ export default function OrderPane({
   onUpdateQuantity,
   onRemoveItem,
   onClearOrder,
+  onProcessOrder,
 }) {
   const calculateTotal = () => {
     return orderItems.reduce(
@@ -82,7 +83,11 @@ export default function OrderPane({
                 <span>{formatPrice(calculateTotal())}</span>
               </div>
 
-              <Button className="w-full mt-4" size="lg">
+              <Button
+                onClick={onProcessOrder}
+                className="w-full mt-4"
+                size="lg"
+              >
                 Process Order
               </Button>
             </div>
