@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
+import { formatCurrency } from "../lib/format-currency";
 
 export default function OrderPane({
   orderItems,
@@ -14,17 +15,6 @@ export default function OrderPane({
       (total, item) => total + item.price * item.quantity,
       0
     );
-  };
-
-  const formatPrice = (price) => {
-    const formattedPrice = new Intl.NumberFormat("en-PK", {
-      style: "currency",
-      currency: "PKR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-
-    return formattedPrice;
   };
 
   const totalItems = orderItems.reduce(
@@ -80,7 +70,7 @@ export default function OrderPane({
             <div className="border-t pt-2 space-y-0">
               <div className="flex justify-between font-semibold text-lg">
                 <span>Total ({totalItems})</span>
-                <span>{formatPrice(calculateTotal())}</span>
+                <span>{formatCurrency(calculateTotal())}</span>
               </div>
 
               <Button
@@ -103,7 +93,9 @@ function OrderItem({ item, onUpdateQuantity, onRemoveItem }) {
     <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
       <div className="flex-1 min-w-0">
         <h4 className="font-medium text-sm truncate">{item.name}</h4>
-        <p className="text-sm text-muted-foreground">{item.price} each</p>
+        <p className="text-sm text-muted-foreground">
+          {formatCurrency(item.price)} each
+        </p>
       </div>
 
       <div className="flex items-center space-x-2 ml-3">

@@ -1,34 +1,27 @@
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 import { useState } from "react";
 import ItemsPane from "@/components/ItemsPane";
 import OrderPane from "@/components/OrderPane";
 import Navbar from "@/components/Navbar";
-import { useOrder } from "@/providers/OrderProvider";
+import OrderConfirmationModal from "@/components/OrderConfirmationModal";
 
 export default function Home() {
   const { user } = useAuth();
   const [orderItems, setOrderItems] = useState([]);
-  const { setOrder } = useOrder();
-  const navigate = useNavigate();
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   if (!user) {
     return <Navigate to="/login" />;
   }
 
+  const totalAmount = orderItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+
   const processOrder = () => {
-    const totalAmount = orderItems.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
-
-    setOrder((prev) => ({
-      ...prev,
-      total_amount: totalAmount,
-      items: orderItems,
-    }));
-
-    navigate("/checkout");
+    setIsOrderModalOpen(true);
   };
 
   const handleAddToOrder = (item) => {
@@ -72,6 +65,15 @@ export default function Home() {
     setOrderItems([]);
   };
 
+  const handleOrderModalClose = (isOpen) => {
+    setIsOrderModalOpen(isOpen);
+  };
+
+  const handleOrderSuccess = () => {
+    setOrderItems([]);
+    setIsOrderModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -96,6 +98,15 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Order Confirmation Modal */}
+      <OrderConfirmationModal
+        open={isOrderModalOpen}
+        onOpenChange={handleOrderModalClose}
+        onOrderSuccess={handleOrderSuccess}
+        orderItems={orderItems}
+        totalAmount={totalAmount}
+      />
     </div>
   );
 }

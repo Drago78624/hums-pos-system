@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import { getItems, getCategories } from "@/services/items.services";
 import { Input } from "@/components/ui/input";
+import { formatCurrency } from "../lib/format-currency";
 
 export default function ItemsPane({ onAddToOrder }) {
   const [items, setItems] = useState([]);
@@ -109,16 +110,13 @@ export default function ItemsPane({ onAddToOrder }) {
 }
 
 function ItemCard({ item, onAddToOrder }) {
-  const formatPrice = (price) => {
-    return "Rs. " + price;
-  };
   return (
     <Card className="hover:shadow-md transition-shadow py-1">
       <CardContent className="p-4">
         <div className="space-y-2">
           <h3 className="font-medium text-sm leading-tight">{item.name}</h3>
           <p className="text-lg font-semibold text-primary">
-            {formatPrice(item.price)}
+            {formatCurrency(item.price)}
           </p>
           <Button
             size="sm"
